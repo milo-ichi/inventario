@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sistema de Inventario</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{
+font-family: Arial;
+background:#f4f6f9;
+margin:0;
+padding:20px;
+}
+
+h1{
+text-align:center;
+}
+
+.container{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+input,button{
+padding:8px;
+margin:5px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+border-bottom:1px solid #ddd;
+padding:8px;
+text-align:center;
+}
+
+button{
+background:#3b82f6;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+button:hover{
+background:#2563eb;
+}
+
+.stats{
+display:flex;
+justify-content:space-around;
+font-size:18px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📦 Sistema de Inventario y Ventas</h1>
+
+<div class="stats">
+<div>💰 Ganancia: $<span id="ganancia">0</span></div>
+<div>📉 Gastos: $<span id="gastos">0</span></div>
+<div>🛒 Ventas: $<span id="ventas">0</span></div>
+</div>
+
+<div class="container">
+
+<div class="card">
+<h2>Agregar Producto</h2>
+
+<input id="nombre" placeholder="Producto">
+<input id="compra" placeholder="Precio compra">
+<input id="venta" placeholder="Precio venta">
+<input id="cantidad" placeholder="Cantidad">
+
+<button onclick="agregarProducto()">Agregar</button>
+
+<table>
+<thead>
+<tr>
+<th>Producto</th>
+<th>Stock</th>
+<th>Vender</th>
+</tr>
+</thead>
+
+<tbody id="tablaProductos"></tbody>
+</table>
+</div>
+
+<div class="card">
+<h2>Gráfico de ventas</h2>
+<canvas id="grafico"></canvas>
+</div>
+
+</div>
+
+<script>
+
+let productos=[]
+let ventas=0
+let gastos=0
+let ganancia=0
+
+function actualizarTabla(){
+
+let tabla=document.getElementById("tablaProductos")
+tabla.innerHTML=""
+
+productos.forEach((p,i)=>{
+
+tabla.innerHTML+=`
+<tr>
+<td>${p.nombre}</td>
+<td>${p.stock}</td>
+<td><button onclick="vender(${i})">Vender</button></td>
+</tr>
+`
+
+})
+
+document.getElementById("ventas").innerText=ventas
+document.getElementById("gastos").innerText=gastos
+document.getElementById("ganancia").innerText=ganancia
+
+}
+
+function agregarProducto(){
+
+let nombre=document.getElementById("nombre").value
+let compra=parseFloat(document.getElementById("compra").value)
+let venta=parseFloat(document.getElementById("venta").value)
+let cantidad=parseInt(document.getElementById("cantidad").value)
+
+productos.push({
+nombre:nombre,
+compra:compra,
+venta:venta,
+stock:cantidad
+})
+
+gastos+=compra*cantidad
+
+actualizarTabla()
+actualizarGrafico()
+
+}
+
+function vender(i){
+
+let p=productos[i]
+
+if(p.stock>0){
+
+p.stock--
+
+ventas+=p.venta
+ganancia+=p.venta-p.compra
+
+actualizarTabla()
+actualizarGrafico()
+
+}
+
+}
+
+let chart
+
+function actualizarGrafico(){
+
+let data={
+labels:["Ventas","Gastos","Ganancia"],
+datasets:[{
+label:"Dinero",
+data:[ventas,gastos,ganancia],
+backgroundColor:["green","red","blue"]
+}]
+}
+
+if(chart){
+chart.destroy()
+}
+
+chart=new Chart(document.getElementById("grafico"),{
+type:"bar",
+data:data
+})
+
+}
+
+</script>
+
+</body>
+</html>
